@@ -46,6 +46,7 @@ OBJECT_TO_IDX = {
     'goal'          : 8,
     'lava'          : 9,
     'agent'         : 10,
+    'gift'          : 11,
 }
 
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
@@ -141,6 +142,8 @@ class WorldObj:
             v = Goal()
         elif obj_type == 'lava':
             v = Lava()
+        elif obj_type == 'gift':
+            v = Gift(color)
         else:
             assert False, "unknown object type in decode '%s'" % objType
 
@@ -330,6 +333,60 @@ class Box(WorldObj):
         # Replace the box by its contents
         env.grid.set(*pos, self.contains)
         return True
+
+
+class Gift(WorldObj):
+    """A gift is initialized unopened, colored red.  Once the gift is
+    irreversibly opened, it is colored grey.
+    """
+    def __init__(self):
+        super().__init__('gift', color='red')
+        self.is_open = False
+
+    def can_overlap(self):
+        return False
+
+    def can_pickup(self):
+        return False
+
+    def see_behind(self):
+        return True
+
+    def can_contain(self):
+        return False
+
+    def toggle(self, env, pos):
+        """Can only open a gift once, can't close it"""
+        if self.is_open is False:
+            self.is_open = True
+            self.color = 'grey'
+            return True
+        return False
+
+    def encode(self):
+        """Encode the description of this object as a 3-tuple of integers
+
+        State, 0: open, 1: closed
+        """
+        if self.is_open:
+            state = 0
+        else:
+            state = 1
+        return (OBJECT_TO_IDX[self.type], COLOR_TO_IDX[self.color], state)
+
+    def render(self, img):
+        c = COLORS[self.color]
+
+        # Outline
+        fill_coords(img, point_in_rect(0.12, 0.88, 0.12, 0.88), c)
+        fill_coords(img, point_in_rect(0.18, 0.82, 0.18, 0.82), (0,0,0))
+
+        # Horizontal slit
+        fill_coords(img, point_in_rect(0.16, 0.84, 0.47, 0.53), c)
+
+        # Vertical slit
+        fill_coords(img, point_in_rect(0.47, 0.53, 0.16, 0.84), c)
+
 
 class Grid:
     """
@@ -760,6 +817,7 @@ class MiniGridEnv(gym.Env):
             'box'           : 'B',
             'goal'          : 'G',
             'lava'          : 'V',
+            'gift'          : 'P',
         }
 
         # Short string for opened door
@@ -1090,6 +1148,7 @@ class MiniGridEnv(gym.Env):
     def step(self, action):
         self.step_count += 1
 
+        info = {}
         reward = 0
         done = False
 
@@ -1137,7 +1196,7 @@ class MiniGridEnv(gym.Env):
         # Toggle/activate an object
         elif action == self.actions.toggle:
             if fwd_cell:
-                fwd_cell.toggle(self, fwd_pos)
+                info['toggle_succeeded'] = fwd_cell.toggle(self, fwd_pos)
 
         # Done action (not used by default)
         elif action == self.actions.done:
@@ -1151,7 +1210,7 @@ class MiniGridEnv(gym.Env):
 
         obs = self.gen_obs()
 
-        return obs, reward, done, {}
+        return obs, reward, done, info
 
     def gen_obs_grid(self):
         """
