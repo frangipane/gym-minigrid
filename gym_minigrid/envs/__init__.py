@@ -22,3 +22,4 @@ from gym_minigrid.envs.distshift import *
 
 ## my custom envs
 from gym_minigrid.envs.doorkeyoptional import *
+from gym_minigrid.envs.opengifts import *
