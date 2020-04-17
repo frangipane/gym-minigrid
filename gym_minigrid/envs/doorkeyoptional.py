@@ -10,8 +10,9 @@ class DoorKeyOptionalEnv(MiniGridEnv):
     when the environment is initialized.
     """
 
-    def __init__(self, size=8, key_color=None):
-        self._key_color = key_color  # must be yellow to solve task        
+    def __init__(self, size=8, key_color=None, door_color='yellow'):
+        self._key_color = key_color  # must be same as door_color to solve task
+        self._door_color = door_color
         super().__init__(
             grid_size=size,
             max_steps=10*size*size
@@ -71,14 +72,14 @@ class DoorKeyOptionalEnv(MiniGridEnv):
 
         # Place a door in the wall
         doorIdx = self._rand_int(1, width-2)
-        self.put_obj(Door('yellow', is_locked=True), splitIdx, doorIdx)
+        self.put_obj(Door(self._door_color, is_locked=True), splitIdx, doorIdx)
 
         self.mission = "use the key to open the door and then get to the goal"
 
 
 class DoorHasKey8x8Env(DoorKeyOptionalEnv):
     def __init__(self):
-        super().__init__(size=8, key_color='yellow')
+        super().__init__(size=8, key_color='yellow', door_color='yellow')
 
 
 class DoorNoKey8x8Env(DoorKeyOptionalEnv):
