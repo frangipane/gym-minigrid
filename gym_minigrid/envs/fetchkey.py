@@ -9,13 +9,17 @@ class KeyEnv(MiniGridEnv):
     either case.
     """
 
-    def __init__(self, size=8, key_color='yellow', start_by_key=False):
+    def __init__(self,
+                 size=8,
+                 key_color='yellow',
+                 start_by_key=False,
+                 max_steps=2*8**2):
         self.key_color = key_color
         self._start_by_key = start_by_key
 
         super().__init__(
             grid_size=size,
-            max_steps=2*size**2,
+            max_steps=max_steps,
             # Set this to True for maximum speed
             see_through_walls=True,
         )

@@ -4,19 +4,21 @@ from gym_minigrid.register import register
 
 class DoorKeyOptionalEnv(MiniGridEnv):
     """
-    Environment with a yellow door and no key, sparse reward
+    Environment with a yellow door and no key, sparse reward.  Agent
+    must unlock door to reach goal.
 
     Agent cannot solve task unless it is already carrying a yellow key 
     when the environment is initialized.
     """
 
-    def __init__(self, size=8, key_color=None, door_color='yellow'):
+    def __init__(self,
+                 size=8,
+                 key_color=None,
+                 door_color='yellow',
+                 max_steps=10*8**2):
         self._key_color = key_color  # must be same as door_color to solve task
         self._door_color = door_color
-        super().__init__(
-            grid_size=size,
-            max_steps=10*size*size
-        )
+        super().__init__(grid_size=size, max_steps=max_steps)
 
     def reset(self):
         """Override reset so that agent can be initialized
