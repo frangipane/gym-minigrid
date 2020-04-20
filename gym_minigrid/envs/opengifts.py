@@ -8,7 +8,11 @@ class GiftsEnv(MiniGridEnv):
     placed gifts
     """
 
-    def __init__(self, size=8, num_objs=3, gift_reward=10):
+    def __init__(self,
+                 size=8,
+                 num_objs=3,
+                 gift_reward=10,
+                 max_steps=5*8**2):
         self._gift_reward = gift_reward  # TODO: draw this from a Gaussian
         if num_objs < 1:
             raise ValueError(f"num_objs must be an integer greater than 0")
@@ -17,7 +21,7 @@ class GiftsEnv(MiniGridEnv):
 
         super().__init__(
             grid_size=size,
-            max_steps=5*size**2,
+            max_steps=5*max_steps,
             # Set this to True for maximum speed
             see_through_walls=True
         )
