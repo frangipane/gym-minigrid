@@ -72,6 +72,6 @@ class TinyKeyGiftsDoorEnv(KeyToGiftsToDoorKeyOptional):
 
 
 register(
-    id='MiniGrid-KeyDoorGifts-tiny-v0',
+    id='MiniGrid-KeyGiftsDoor-tiny-v0',
     entry_point='gym_minigrid.envs:TinyKeyGiftsDoorEnv'
 )
