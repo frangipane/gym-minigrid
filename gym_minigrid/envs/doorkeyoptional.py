@@ -15,10 +15,28 @@ class DoorKeyOptionalEnv(MiniGridEnv):
                  size=8,
                  key_color=None,
                  door_color='yellow',
+                 door_reward=1.0,
                  max_steps=10*8**2):
+        self._door_reward = door_reward
         self._key_color = key_color  # must be same as door_color to solve task
         self._door_color = door_color
         super().__init__(grid_size=size, max_steps=max_steps)
+
+    def step(self, action):
+        obs, reward, done, info = super().step(action)
+
+        # agent opened the single door
+        if action == self.actions.toggle and info.get('toggle_succeeded') is True:
+            # Get the position in front of the agent
+            fwd_pos = self.front_pos
+
+            # Get the contents of the cell in front of the agent
+            fwd_cell = self.grid.get(*fwd_pos)
+
+            if fwd_cell.type == 'door':
+                reward += self._door_reward
+
+        return obs, reward, done, info
 
     def reset(self):
         """Override reset so that agent can be initialized
