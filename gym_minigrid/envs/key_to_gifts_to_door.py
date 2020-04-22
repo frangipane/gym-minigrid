@@ -10,15 +10,21 @@ class KeyToGiftsToDoorKeyOptional(gym.Wrapper):
     """
     Stitches together three environments: 
     (1) KeyEnv 
-    (2) GiftsEnv
+    (2) GiftsEnv -- this phase is optional
     (3) DoorKeyOptionalEnv
 
     Agent is teleported from (1) to (2) to (3).  The agent is initialized with or
     without the key in (3), depending on whether it successfully fetched it in (1).
+
+    If the gifts_kwargs dictionary is empty, then omit the GiftsEnv.
     """
     def __init__(self, key_kwargs, gifts_kwargs, doorkeyoptional_kwargs):
-        self._envs = [KeyEnv, GiftsEnv, DoorKeyOptionalEnv]
-        self._env_kwargs = [key_kwargs, gifts_kwargs, doorkeyoptional_kwargs]
+        if len(gifts_kwargs) == 0:
+            self._envs = [KeyEnv, DoorKeyOptionalEnv]
+            self._env_kwargs = [key_kwargs, doorkeyoptional_kwargs]
+        else:
+            self._envs = [KeyEnv, GiftsEnv, DoorKeyOptionalEnv]
+            self._env_kwargs = [key_kwargs, gifts_kwargs, doorkeyoptional_kwargs]
         self.num_phases = len(self._envs)
         self._env_idx = None  # index of the current env
         self.env = KeyEnv(**key_kwargs)
@@ -35,10 +41,12 @@ class KeyToGiftsToDoorKeyOptional(gym.Wrapper):
     def step(self, action):
         observation, reward, done, info = self.env.step(action)
         if done is True and self._env_idx < self.num_phases - 1:
+            # to maintain compatibility with rendering
+            self.env.render(close=True)
             if self._env_idx == 0:
                 # if agent fetched key in first environment, initialize it with a key
                 # in the last environment
-                self._env_kwargs[2]['key_color'] = info.get('carrying_key_color')
+                self._env_kwargs[-1]['key_color'] = info.get('carrying_key_color')
 
             # teleport to the next environment
             self._env_idx += 1
@@ -71,7 +79,58 @@ class TinyKeyGiftsDoorEnv(KeyToGiftsToDoorKeyOptional):
         super().__init__(key_kwargs, gifts_kwargs, doorkeyoptional_kwargs)
 
 
+class MediumKeyGiftsDoorEnv(KeyToGiftsToDoorKeyOptional):
+    def __init__(self):
+        key_kwargs = dict(
+            size=6,
+            key_color='yellow',
+            start_by_key=False,
+            max_steps=5*6**2
+        )
+        gifts_kwargs = dict(
+            size=9,
+            num_objs=4,
+            gift_reward=1,
+            max_steps=5*9**2
+        )
+        doorkeyoptional_kwargs = dict(
+            size=8,
+            key_color=None,
+            door_color='yellow',
+            max_steps=5*8**2
+        )
+        super().__init__(key_kwargs, gifts_kwargs, doorkeyoptional_kwargs)
+
+
+class KeyNoGiftsDoorEnv(KeyToGiftsToDoorKeyOptional):
+    def __init__(self):
+        key_kwargs = dict(
+            size=6,
+            key_color='yellow',
+            start_by_key=False,
+            max_steps=5*6**2
+        )
+        gifts_kwargs = dict()
+        doorkeyoptional_kwargs = dict(
+            size=8,
+            key_color=None,
+            door_color='yellow',
+            max_steps=5*8**2
+        )
+        super().__init__(key_kwargs, gifts_kwargs, doorkeyoptional_kwargs)
+
+
 register(
     id='MiniGrid-KeyGiftsDoor-tiny-v0',
     entry_point='gym_minigrid.envs:TinyKeyGiftsDoorEnv'
+)
+
+register(
+    id='MiniGrid-KeyGiftsDoor-medium-v0',
+    entry_point='gym_minigrid.envs:MediumKeyGiftsDoorEnv'
+)
+
+register(
+    id='MiniGrid-KeyNoGiftsDoor-v0',
+    entry_point='gym_minigrid.envs:KeyNoGiftsDoorEnv'
 )
