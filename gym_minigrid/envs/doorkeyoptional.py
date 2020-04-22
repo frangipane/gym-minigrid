@@ -20,6 +20,7 @@ class DoorKeyOptionalEnv(MiniGridEnv):
         self._door_reward = door_reward
         self._key_color = key_color  # must be same as door_color to solve task
         self._door_color = door_color
+        self._door_num_times_opened = 0
         super().__init__(grid_size=size, max_steps=max_steps)
 
     def step(self, action):
@@ -33,8 +34,10 @@ class DoorKeyOptionalEnv(MiniGridEnv):
             # Get the contents of the cell in front of the agent
             fwd_cell = self.grid.get(*fwd_pos)
 
-            if fwd_cell.type == 'door':
+            # Only reward first opening of door
+            if fwd_cell.type == 'door' and self._door_num_times_opened == 0:
                 reward += self._door_reward
+                self._door_num_times_opened += 1
 
         return obs, reward, done, info
 
@@ -67,6 +70,9 @@ class DoorKeyOptionalEnv(MiniGridEnv):
 
         # Step count since episode start
         self.step_count = 0
+
+        # Reset count of times door opened
+        self._door_num_times_opened = 0
 
         # Return first observation
         obs = self.gen_obs()
