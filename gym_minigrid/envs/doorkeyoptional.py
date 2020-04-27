@@ -16,12 +16,14 @@ class DoorKeyOptionalEnv(MiniGridEnv):
                  key_color=None,
                  door_color='yellow',
                  door_reward=1.0,
-                 max_steps=10*8**2):
+                 max_steps=10*8**2,
+                 seed=1337,
+    ):
         self._door_reward = door_reward
         self._key_color = key_color  # must be same as door_color to solve task
         self._door_color = door_color
         self._door_num_times_opened = 0
-        super().__init__(grid_size=size, max_steps=max_steps)
+        super().__init__(grid_size=size, max_steps=max_steps, seed=seed)
 
     def step(self, action):
         obs, reward, done, info = super().step(action)
