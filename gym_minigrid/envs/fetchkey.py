@@ -13,7 +13,8 @@ class KeyEnv(MiniGridEnv):
                  size=8,
                  key_color='yellow',
                  start_by_key=False,
-                 max_steps=2*8**2):
+                 max_steps=2*8**2,
+                 seed=1337):
         self.key_color = key_color
         self._start_by_key = start_by_key
 
@@ -22,6 +23,7 @@ class KeyEnv(MiniGridEnv):
             max_steps=max_steps,
             # Set this to True for maximum speed
             see_through_walls=True,
+            seed=seed,
         )
 
     def _gen_grid(self, width, height):
@@ -44,8 +46,8 @@ class KeyEnv(MiniGridEnv):
                          self.agent_pos[0]+1,
                          self.agent_pos[1])
         else:
-            # Put key in bottom-right corner
-            self.put_obj(Key(self.key_color), width-2, height-2)
+            # Put key in a random location
+            self.place_obj(Key(self.key_color))
 
         self.mission = "fetch a key"
 

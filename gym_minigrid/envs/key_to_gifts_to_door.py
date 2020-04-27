@@ -6,7 +6,7 @@ from gym_minigrid.envs.opengifts import GiftsEnv
 from gym_minigrid.envs.doorkeyoptional import DoorKeyOptionalEnv
 
 
-class KeyToGiftsToDoorKeyOptional(gym.Wrapper):
+class KeyToGiftsToDoorKeyOptional(gym.Env):
     """
     Stitches together three environments: 
     (1) KeyEnv 
@@ -18,7 +18,7 @@ class KeyToGiftsToDoorKeyOptional(gym.Wrapper):
 
     If the gifts_kwargs dictionary is empty, then omit the GiftsEnv.
     """
-    def __init__(self, key_kwargs, gifts_kwargs, doorkeyoptional_kwargs):
+    def __init__(self, key_kwargs, gifts_kwargs, doorkeyoptional_kwargs, seed=111):
         if len(gifts_kwargs) == 0:
             self._envs = [KeyEnv, DoorKeyOptionalEnv]
             self._env_kwargs = [key_kwargs, doorkeyoptional_kwargs]
@@ -26,15 +26,22 @@ class KeyToGiftsToDoorKeyOptional(gym.Wrapper):
             self._envs = [KeyEnv, GiftsEnv, DoorKeyOptionalEnv]
             self._env_kwargs = [key_kwargs, gifts_kwargs, doorkeyoptional_kwargs]
         self.num_phases = len(self._envs)
+        self._wrapper_seed = seed
         self._env_idx = None  # index of the current env
         self.env = KeyEnv(**key_kwargs)
-        super().__init__(self.env)
-
+        self.action_space = self.env.action_space
+        self.observation_space = self.env.observation_space
+        self.reward_range = self.env.reward_range
+        self.metadata = self.env.metadata
 
     def reset(self):
         """reset returns agent back to first environment, KeyEnv"""
         self._env_idx = 0
-        self.env = self._envs[self._env_idx](**self._env_kwargs[self._env_idx])
+        self._wrapper_seed += 1
+        self.env = self._envs[self._env_idx](
+            **self._env_kwargs[self._env_idx],
+            seed=self._wrapper_seed
+        )
         observation = self.env.reset()
         return observation
 
@@ -50,10 +57,27 @@ class KeyToGiftsToDoorKeyOptional(gym.Wrapper):
 
             # teleport to the next environment
             self._env_idx += 1
-            self.env = self._envs[self._env_idx](**self._env_kwargs[self._env_idx])
+            self.env = self._envs[self._env_idx](
+                **self._env_kwargs[self._env_idx],
+                seed=self._wrapper_seed
+            )
             observation, reward, done, info = self.env.reset(), 0, False, {}
 
         return observation, reward, done, info
+
+    def __getattr__(self, name):
+        if name.startswith('_'):
+            raise AttributeError("attempted to get missing private attribute '{}'".format(name))
+        return getattr(self.env, name)
+
+    def seed(self, seed=None):
+        return self.env.seed(seed)
+
+    def close(self):
+        return self.env.close()
+
+    def render(self, mode='human', **kwargs):
+        return self.env.render(mode, **kwargs)
 
 
 class TinyKeyGiftsDoorEnv(KeyToGiftsToDoorKeyOptional):
@@ -88,16 +112,16 @@ class MediumKeyGiftsDoorEnv(KeyToGiftsToDoorKeyOptional):
             max_steps=5*6**2
         )
         gifts_kwargs = dict(
-            size=9,
-            num_objs=4,
-            gift_reward=1,
-            max_steps=5*9**2
+            size=6,
+            num_objs=2,
+            gift_reward=0.1,
+            max_steps=5*6**2
         )
         doorkeyoptional_kwargs = dict(
-            size=8,
+            size=6,
             key_color=None,
             door_color='yellow',
-            max_steps=5*8**2
+            max_steps=5*6**2
         )
         super().__init__(key_kwargs, gifts_kwargs, doorkeyoptional_kwargs)
 

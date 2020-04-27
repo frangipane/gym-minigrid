@@ -12,7 +12,9 @@ class GiftsEnv(MiniGridEnv):
                  size=8,
                  num_objs=3,
                  gift_reward=10,
-                 max_steps=5*8**2):
+                 max_steps=5*8**2,
+                 seed=1337
+    ):
         self._gift_reward = gift_reward  # TODO: draw this from a Gaussian
         if num_objs < 1:
             raise ValueError(f"num_objs must be an integer greater than 0")
@@ -23,7 +25,8 @@ class GiftsEnv(MiniGridEnv):
             grid_size=size,
             max_steps=5*max_steps,
             # Set this to True for maximum speed
-            see_through_walls=True
+            see_through_walls=True,
+            seed=seed
         )
 
     def _gen_grid(self, width, height):
