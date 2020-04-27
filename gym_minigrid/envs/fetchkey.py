@@ -46,8 +46,8 @@ class KeyEnv(MiniGridEnv):
                          self.agent_pos[0]+1,
                          self.agent_pos[1])
         else:
-            # Put key in bottom-right corner
-            self.put_obj(Key(self.key_color), width-2, height-2)
+            # Put key in a random location
+            self.place_obj(Key(self.key_color))
 
         self.mission = "fetch a key"
 
