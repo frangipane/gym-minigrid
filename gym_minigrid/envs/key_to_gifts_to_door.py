@@ -61,7 +61,7 @@ class KeyToGiftsToDoorKeyOptional(gym.Env):
                 **self._env_kwargs[self._env_idx],
                 seed=self._wrapper_seed
             )
-            observation, reward, done, info = self.env.reset(), 0, False, {}
+            observation, done, info = self.env.reset(), False, {}
 
         return observation, reward, done, info
 
