@@ -54,6 +54,8 @@ class KeyToGiftsToDoorKeyOptional(gym.Env):
                 # if agent fetched key in first environment, initialize it with a key
                 # in the last environment
                 self._env_kwargs[-1]['key_color'] = info.get('carrying_key_color')
+                if info.get('carrying_key_color') is not None:
+                    print("Agent picked up key!")
 
             # teleport to the next environment
             self._env_idx += 1
@@ -86,7 +88,7 @@ class TinyKeyGiftsDoorEnv(KeyToGiftsToDoorKeyOptional):
             size=6,
             key_color='yellow',
             start_by_key=False,
-            max_steps=10
+            max_steps=6**2
         )
         gifts_kwargs = dict(
             size=6,
@@ -98,7 +100,7 @@ class TinyKeyGiftsDoorEnv(KeyToGiftsToDoorKeyOptional):
             size=8,
             key_color=None,
             door_color='yellow',
-            max_steps=30
+            max_steps=8**2
         )
         super().__init__(key_kwargs, gifts_kwargs, doorkeyoptional_kwargs)
 
