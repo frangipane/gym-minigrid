@@ -25,3 +25,4 @@ from gym_minigrid.envs.doorkeyoptional import *
 from gym_minigrid.envs.opengifts import *
 from gym_minigrid.envs.fetchkey import *
 from gym_minigrid.envs.key_to_gifts_to_door import *
+from gym_minigrid.envs.keygoal import *
