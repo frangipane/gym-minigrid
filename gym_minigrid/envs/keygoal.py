@@ -59,17 +59,17 @@ class KeyGoalEnv(MiniGridEnv):
 
 class KeyGoalEnv6x6(KeyGoalEnv):
     def __init__(self):
-        super().__init__(size=6)
+        super().__init__(size=6, max_steps=10*6**2)
 
 
 class KeyGoalEnv8x8(KeyGoalEnv):
     def __init__(self):
-        super().__init__(size=8)
+        super().__init__(size=8, max_steps=10*8**2)
 
 
 class KeyGoalEnv10x10(KeyGoalEnv):
     def __init__(self):
-        super().__init__(size=10)
+        super().__init__(size=10, max_steps=10*10**2)
 
 
 register(
