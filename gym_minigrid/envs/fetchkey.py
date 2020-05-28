@@ -7,6 +7,10 @@ class KeyEnv(MiniGridEnv):
     Environment in which the agent has to fetch a key.  
     Episode ends when key is fetched, or timeout, but no reward is given in
     either case.
+
+    done_when_fetched : bool, if True, env returns done as True
+       when key is fetched.  Otherwise, done only happens at timeout
+       from reaching max_steps.
     """
 
     def __init__(self,
@@ -14,9 +18,11 @@ class KeyEnv(MiniGridEnv):
                  key_color='yellow',
                  start_by_key=False,
                  max_steps=2*8**2,
+                 done_when_fetched=False,
                  seed=1337):
         self.key_color = key_color
         self._start_by_key = start_by_key
+        self._done_when_fetched = done_when_fetched
 
         super().__init__(
             grid_size=size,
@@ -57,7 +63,9 @@ class KeyEnv(MiniGridEnv):
         if self.carrying and self.carrying.type == 'key':
             info['carrying_key_color'] = self.carrying.color
             reward = 0
-            done = True
+
+            if self._done_when_fetched:
+                done = True
 
         return obs, reward, done, info
 

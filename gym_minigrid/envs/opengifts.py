@@ -11,6 +11,10 @@ class GiftsEnv(MiniGridEnv):
     gift_reward : scalar, or list/tuple
        if list/tuple, then a range of [min, max) specifying the reward range
        to uniformly sample from.
+
+    done_when_all_opened : bool, if True, env returns done as True
+       when all gifts have been opened.  Otherwise, done only
+       happens at timeout from reaching max_steps.
     """
 
     def __init__(self,
@@ -18,6 +22,7 @@ class GiftsEnv(MiniGridEnv):
                  num_objs=3,
                  gift_reward=10.,
                  max_steps=5*8**2,
+                 done_when_all_opened=False,
                  seed=1337
     ):
         if not isinstance(gift_reward, (list, tuple)):
@@ -27,6 +32,7 @@ class GiftsEnv(MiniGridEnv):
             raise ValueError(f"num_objs must be an integer greater than 0")
         self.num_objs = num_objs
         self._num_opened = 0
+        self._done_when_all_opened = done_when_all_opened
 
         super().__init__(
             grid_size=size,
@@ -69,7 +75,7 @@ class GiftsEnv(MiniGridEnv):
             if fwd_cell.type == 'gift':
                 reward += np.random.uniform(*self._gift_reward)
                 self._num_opened += 1
-                if self._num_opened == self.num_objs:
+                if self._done_when_all_opened and self._num_opened == self.num_objs:
                     done = True
 
         return obs, reward, done, info
