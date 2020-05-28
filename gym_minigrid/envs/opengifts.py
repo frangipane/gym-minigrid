@@ -30,7 +30,7 @@ class GiftsEnv(MiniGridEnv):
 
         super().__init__(
             grid_size=size,
-            max_steps=5*max_steps,
+            max_steps=max_steps,
             # Set this to True for maximum speed
             see_through_walls=True,
             seed=seed
