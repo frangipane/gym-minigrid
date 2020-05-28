@@ -15,14 +15,16 @@ class DoorKeyOptionalEnv(MiniGridEnv):
                  size=8,
                  key_color=None,
                  door_color='yellow',
-                 door_reward=1.0,
+                 door_reward=0.0,
                  max_steps=10*8**2,
                  seed=1337,
+                 goal_reward=1,
     ):
         self._door_reward = door_reward
         self._key_color = key_color  # must be same as door_color to solve task
         self._door_color = door_color
         self._door_num_times_opened = 0
+        self._goal_reward = goal_reward
         super().__init__(grid_size=size, max_steps=max_steps, seed=seed)
 
     def step(self, action):
@@ -103,6 +105,13 @@ class DoorKeyOptionalEnv(MiniGridEnv):
         self.put_obj(Door(self._door_color, is_locked=True), splitIdx, doorIdx)
 
         self.mission = "use the key to open the door and then get to the goal"
+
+    def _reward(self):
+        """
+        Compute the reward to be given upon success.  Overrides default
+        of 1 - 0.9 * (self.step_count / self.max_steps)
+        """
+        return self._goal_reward - 0.9 * (self.step_count / self.max_steps)
 
 
 class DoorHasKey8x8Env(DoorKeyOptionalEnv):

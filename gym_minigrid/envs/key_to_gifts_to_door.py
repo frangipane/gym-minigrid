@@ -73,6 +73,7 @@ class KeyToGiftsToDoorKeyOptional(gym.Env):
         return getattr(self.env, name)
 
     def seed(self, seed=None):
+        self._wrapper_seed = seed
         return self.env.seed(seed)
 
     def close(self):

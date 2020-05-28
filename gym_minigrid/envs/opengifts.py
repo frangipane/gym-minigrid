@@ -1,3 +1,4 @@
+import numpy as np
 from gym_minigrid.minigrid import *
 from gym_minigrid.register import register
 
@@ -6,16 +7,22 @@ class GiftsEnv(MiniGridEnv):
     """
     Environment in which the agent has to open randomly 
     placed gifts
+
+    gift_reward : scalar, or list/tuple
+       if list/tuple, then a range of [min, max) specifying the reward range
+       to uniformly sample from.
     """
 
     def __init__(self,
                  size=8,
                  num_objs=3,
-                 gift_reward=10,
+                 gift_reward=10.,
                  max_steps=5*8**2,
                  seed=1337
     ):
-        self._gift_reward = gift_reward  # TODO: draw this from a Gaussian
+        if not isinstance(gift_reward, (list, tuple)):
+            self._gift_reward = [gift_reward, gift_reward]
+
         if num_objs < 1:
             raise ValueError(f"num_objs must be an integer greater than 0")
         self.num_objs = num_objs
@@ -23,7 +30,7 @@ class GiftsEnv(MiniGridEnv):
 
         super().__init__(
             grid_size=size,
-            max_steps=5*max_steps,
+            max_steps=max_steps,
             # Set this to True for maximum speed
             see_through_walls=True,
             seed=seed
@@ -60,7 +67,7 @@ class GiftsEnv(MiniGridEnv):
             fwd_cell = self.grid.get(*fwd_pos)
 
             if fwd_cell.type == 'gift':
-                reward += self._gift_reward
+                reward += np.random.uniform(*self._gift_reward)
                 self._num_opened += 1
                 if self._num_opened == self.num_objs:
                     done = True
