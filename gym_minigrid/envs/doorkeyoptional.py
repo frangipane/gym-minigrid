@@ -15,7 +15,7 @@ class DoorKeyOptionalEnv(MiniGridEnv):
                  size=8,
                  key_color=None,
                  door_color='yellow',
-                 door_reward=1.0,
+                 door_reward=0.0,
                  max_steps=10*8**2,
                  seed=1337,
                  goal_reward=1,
