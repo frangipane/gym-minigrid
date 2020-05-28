@@ -344,7 +344,7 @@ class Gift(WorldObj):
         self.is_open = False
 
     def can_overlap(self):
-        return False
+        return True
 
     def can_pickup(self):
         return False
