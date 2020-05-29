@@ -1,3 +1,5 @@
+import warnings
+
 import gym
 from gym_minigrid.register import register
 
@@ -34,14 +36,17 @@ class KeyToGiftsToDoorKeyOptional(gym.Env):
         self.reward_range = self.env.reward_range
         self.metadata = self.env.metadata
 
+        if 'key_color' in self._env_kwargs[-1]:
+            warnings.warn("'key_color' should not be provided in kwargs for last env")
+            # Remove key_color since it should only be set based on whether
+            # the agent picked up the key in the first environment
+            self._env_kwargs[-1].pop('key_color')
+
     def reset(self):
         """reset returns agent back to first environment, KeyEnv"""
         self._env_idx = 0
         self._wrapper_seed += 1
-        self.env = self._envs[self._env_idx](
-            **self._env_kwargs[self._env_idx],
-            seed=self._wrapper_seed
-        )
+        self.env = self._envs[0](**self._env_kwargs[0], seed=self._wrapper_seed)
         observation = self.env.reset()
         return observation
 
