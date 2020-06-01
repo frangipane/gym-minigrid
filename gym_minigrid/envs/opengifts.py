@@ -27,6 +27,8 @@ class GiftsEnv(MiniGridEnv):
     ):
         if not isinstance(gift_reward, (list, tuple)):
             self._gift_reward = [gift_reward, gift_reward]
+        else:
+            self._gift_reward = gift_reward
 
         if num_objs < 1:
             raise ValueError(f"num_objs must be an integer greater than 0")
