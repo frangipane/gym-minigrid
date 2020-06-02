@@ -339,7 +339,7 @@ class Gift(WorldObj):
     """A gift is initialized unopened, colored red.  Once the gift is
     irreversibly opened, it is colored grey.
     """
-    def __init__(self):
+    def __init__(self, color='red'):
         super().__init__('gift', color='red')
         self.is_open = False
 
