@@ -340,7 +340,7 @@ class Gift(WorldObj):
     irreversibly opened, it is colored grey.
     """
     def __init__(self, color='red'):
-        super().__init__('gift', color='red')
+        super().__init__('gift', color=color)
         self.is_open = False
 
     def can_overlap(self):
