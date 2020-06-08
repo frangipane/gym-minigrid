@@ -10,13 +10,13 @@ class GoalKeyOptionalEnv(MiniGridEnv):
 
     def __init__(self,
                  size=8,
-                 key_color=None,
+                 carrying=None,
                  key_reward=3,
                  max_steps=8**2,
                  seed=1337,
                  goal_reward=1.,
     ):
-        self.key_color = key_color
+        self._carrying = carrying
         self.key_reward = key_reward
         self.goal_reward = goal_reward
 
@@ -39,10 +39,7 @@ class GoalKeyOptionalEnv(MiniGridEnv):
         self._gen_grid(self.width, self.height)
 
         # Item picked up, being carried
-        if self.key_color is not None:
-            self.carrying = Key(color=self.key_color)
-        else:
-            self.carrying = None
+        self.carrying = self._carrying
 
         # Step count since episode start
         self.step_count = 0
@@ -85,12 +82,12 @@ class GoalKeyOptionalEnv(MiniGridEnv):
 
 class GoalKeyOptionalEnvNoKey6x6(GoalKeyOptionalEnv):
     def __init__(self):
-        super().__init__(size=6, max_steps=10*6**2, key_color=None)
+        super().__init__(size=6, max_steps=10*6**2, carrying=None)
 
 
 class GoalKeyOptionalEnvWithKey6x6(GoalKeyOptionalEnv):
     def __init__(self):
-        super().__init__(size=6, max_steps=10*6**2, key_color='yellow')
+        super().__init__(size=6, max_steps=10*6**2, carrying=Key('yellow'))
 
 
 register(

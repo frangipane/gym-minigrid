@@ -17,7 +17,8 @@ class ThreePhaseDelayedReward(gym.Env):
         the first phase in KeyEnv, e.g. GoalKeyOptionalEnv and DoorKeyOptionalEnv
 
     Agent is teleported from (1) to (2) to (3).  The agent is initialized with or
-    without the key in (3), depending on whether it successfully fetched it in (1).
+    without the key in (2) and (3), depending on whether it successfully fetched it
+    in (1) and did not drop it before phase (3).
 
     Args
     ----
@@ -26,9 +27,11 @@ class ThreePhaseDelayedReward(gym.Env):
     distractor_env : A function which creates a copy of the environment.
 
     distractor_kwargs (dict) : Any kwargs for the distractor environment.
+        The distractor_env constructor must take `carrying` (None or WorldObject)
+        as a kwarg.
 
     delayed_reward_env : A function which creates a copy of the environment.
-        The delayed_reward_env constructor must take `key_color` (None or string)
+        The delayed_reward_env constructor must take `carrying` (None or string)
         as a kwarg.
 
     delayed_reward_kwargs (dict) : Any kwargs for the distractor environment.
@@ -53,12 +56,6 @@ class ThreePhaseDelayedReward(gym.Env):
         self.reward_range = self.env.reward_range
         self.metadata = self.env.metadata
 
-        if self._env_kwargs[-1].get('key_color') is not None:
-            warnings.warn("'key_color' should not be provided in kwargs for last env")
-            # Remove key_color since it should only be set based on whether
-            # the agent picked up the key in the first environment
-            self._env_kwargs[-1].pop('key_color')
-
     def reset(self):
         """reset returns agent back to first environment, KeyEnv"""
         self._env_idx = 0
@@ -72,12 +69,12 @@ class ThreePhaseDelayedReward(gym.Env):
         if done is True and self._env_idx < self.num_phases - 1:
             # to maintain compatibility with rendering
             self.env.render(close=True)
-            if self._env_idx == 0:
-                # if agent fetched key in first environment, initialize it with a key
-                # in the last environment
-                self._env_kwargs[-1]['key_color'] = info.get('carrying_key_color')
-                if info.get('carrying_key_color') is not None:
-                    print("Agent picked up key!")
+            if self._env_idx == 0 and self.carrying and self.carrying.type == 'key':
+                print("Agent picked up key!")
+
+            # If agent finished the current phase while carrying an object,
+            # then initialize it in next phase carrying the same object
+            self._env_kwargs[self._env_idx + 1]['carrying'] = self.carrying
 
             # teleport to the next environment
             self._env_idx += 1
@@ -187,7 +184,7 @@ class TinyKeyGiftsGoalEnv(ThreePhaseDelayedReward):
             delayed_reward_env=GoalKeyOptionalEnv,
             delayed_reward_kwargs=dict(
                 size=8,
-                key_color=None,
+                carrying=None,
                 max_steps=5*8**2,
                 goal_reward=1.,
                 key_reward=4.,
