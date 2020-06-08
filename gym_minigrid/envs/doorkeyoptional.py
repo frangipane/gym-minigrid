@@ -7,13 +7,13 @@ class DoorKeyOptionalEnv(MiniGridEnv):
     Environment with a yellow door and no key, sparse reward.  Agent
     must unlock door to reach goal.
 
-    Agent cannot solve task unless it is already carrying a yellow key 
-    when the environment is initialized.
+    Agent cannot solve task unless it is already carrying a key matching 
+    the color of the door when the environment is initialized.
     """
 
     def __init__(self,
                  size=8,
-                 key_color=None,
+                 carrying=None,
                  door_color='yellow',
                  door_reward=0.0,
                  max_steps=10*8**2,
@@ -21,7 +21,7 @@ class DoorKeyOptionalEnv(MiniGridEnv):
                  goal_reward=1,
     ):
         self._door_reward = door_reward
-        self._key_color = key_color  # must be same as door_color to solve task
+        self._carrying = carrying  # key must be same color as door to solve task
         self._door_color = door_color
         self._door_num_times_opened = 0
         self._goal_reward = goal_reward
@@ -67,10 +67,7 @@ class DoorKeyOptionalEnv(MiniGridEnv):
         assert start_cell is None or start_cell.can_overlap()
 
         # Item picked up, being carried
-        if self._key_color is not None:
-            self.carrying = Key(color=self._key_color)
-        else:
-            self.carrying = None
+        self.carrying = self._carrying
 
         # Step count since episode start
         self.step_count = 0
@@ -116,12 +113,12 @@ class DoorKeyOptionalEnv(MiniGridEnv):
 
 class DoorHasKey8x8Env(DoorKeyOptionalEnv):
     def __init__(self):
-        super().__init__(size=8, key_color='yellow', door_color='yellow')
+        super().__init__(size=8, carrying=Key('yellow'), door_color='yellow')
 
 
 class DoorNoKey8x8Env(DoorKeyOptionalEnv):
     def __init__(self):
-        super().__init__(size=8, key_color=None)
+        super().__init__(size=8, carrying=None)
 
 
 register(

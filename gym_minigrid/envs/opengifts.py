@@ -5,8 +5,8 @@ from gym_minigrid.register import register
 
 class GiftsEnv(MiniGridEnv):
     """
-    Environment in which the agent has to open randomly 
-    placed gifts
+    Environment in which the agent has to open randomly placed gifts.
+    The agent can be optionally initialized already carrying an object.
 
     gift_reward : scalar, or list/tuple
        if list/tuple, then a range of [min, max) specifying the reward range
@@ -15,6 +15,8 @@ class GiftsEnv(MiniGridEnv):
     done_when_all_opened : bool, if True, env returns done as True
        when all gifts have been opened.  Otherwise, done only
        happens at timeout from reaching max_steps.
+
+    carrying : a WorldObject subclass, e.g. a Key
     """
 
     def __init__(self,
@@ -23,6 +25,7 @@ class GiftsEnv(MiniGridEnv):
                  gift_reward=10.,
                  max_steps=5*8**2,
                  done_when_all_opened=False,
+                 carrying=None,
                  seed=1337
     ):
         if not isinstance(gift_reward, (list, tuple)):
@@ -35,6 +38,7 @@ class GiftsEnv(MiniGridEnv):
         self.num_objs = num_objs
         self._num_opened = 0
         self._done_when_all_opened = done_when_all_opened
+        self._carrying = carrying
 
         super().__init__(
             grid_size=size,
@@ -100,8 +104,8 @@ class GiftsEnv(MiniGridEnv):
         start_cell = self.grid.get(*self.agent_pos)
         assert start_cell is None or start_cell.can_overlap()
 
-        # Item picked up, being carried, initially nothing
-        self.carrying = None
+        # Item picked up, being carried
+        self.carrying = self._carrying
 
         # Step count since episode start
         self.step_count = 0
