@@ -37,6 +37,9 @@ class ThreePhaseDelayedReward(gym.Env):
     delayed_reward_kwargs (dict) : Any kwargs for the distractor environment.
     
     seed (int) : Seed for random number generators.   
+
+    key_teleports_to_end_only (bool) : If True, when agent picks up key in phase 1,
+        it is only teleported to the last phase, not the next phase.
     """
     def __init__(self,
                  key_kwargs,
@@ -44,11 +47,13 @@ class ThreePhaseDelayedReward(gym.Env):
                  distractor_kwargs,
                  delayed_reward_env,
                  delayed_reward_kwargs,
-                 seed=111):
+                 seed=111,
+                 key_teleports_to_end_only=False):
         self._envs = [KeyEnv, distractor_env, delayed_reward_env]
         self._env_kwargs = [key_kwargs, distractor_kwargs, delayed_reward_kwargs]
         self.num_phases = len(self._envs)
         self._wrapper_seed = seed
+        self.key_teleports_to_end_only = key_teleports_to_end_only
         self._env_idx = None  # index of the current env
         self.env = KeyEnv(**key_kwargs)
         self.action_space = self.env.action_space
@@ -72,9 +77,13 @@ class ThreePhaseDelayedReward(gym.Env):
             if self._env_idx == 0 and self.carrying and self.carrying.type == 'key':
                 print("Agent picked up key!")
 
-            # If agent finished the current phase while carrying an object,
-            # then initialize it in next phase carrying the same object
-            self._env_kwargs[self._env_idx + 1]['carrying'] = self.carrying
+            if self._env_idx == 0 and key_teleports_to_end_only:
+                # Initialize agent in the final phase with the same carrying status as in phase 1
+                self._env_kwargs[-1]['carrying'] = self.carrying
+            else:
+                # If agent finished the current phase while carrying an object,
+                # then initialize it in next phase carrying the same object
+                self._env_kwargs[self._env_idx + 1]['carrying'] = self.carrying
 
             # teleport to the next environment
             self._env_idx += 1
