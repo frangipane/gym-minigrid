@@ -26,6 +26,7 @@ class GoalKeyOptionalEnv(MiniGridEnv):
         self.key_reward = key_reward
         self.goal_reward = goal_reward
         self._reached_goal_count = 0
+        self.done_when_goal_reached = done_when_goal_reached
 
         super().__init__(
             grid_size=size,
@@ -50,6 +51,7 @@ class GoalKeyOptionalEnv(MiniGridEnv):
 
         # Step count since episode start
         self.step_count = 0
+        self._reached_goal_count = 0
 
         # Return first observation
         obs = self.gen_obs()
@@ -110,6 +112,11 @@ class GoalKeyOptionalEnvWithKey6x6(GoalKeyOptionalEnv):
         super().__init__(size=6, max_steps=10*6**2, carrying=Key('yellow'))
 
 
+class GoalKeyOptionalEnvWithKeyFixedSteps6x6(GoalKeyOptionalEnv):
+    def __init__(self):
+        super().__init__(size=6, max_steps=20, carrying=Key('yellow'), done_when_goal_reached=False)
+
+
 register(
     id='MiniGrid-GoalKeyOptionalEnvNoKey-6x6-v0',
     entry_point='gym_minigrid.envs:GoalKeyOptionalEnvNoKey6x6'
@@ -119,4 +126,10 @@ register(
 register(
     id='MiniGrid-GoalKeyOptionalEnvWithKey-6x6-v0',
     entry_point='gym_minigrid.envs:GoalKeyOptionalEnvWithKey6x6'
+)
+
+
+register(
+    id='MiniGrid-GoalKeyOptionalEnvWithKeyFixedSteps-6x6-v0',
+    entry_point='gym_minigrid.envs:GoalKeyOptionalEnvWithKeyFixedSteps6x6'
 )
