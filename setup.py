@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='gym_minigrid',
-    version='1.0.6',
+    version='1.0.7',
     keywords='memory, environment, agent, rl, openaigym, openai-gym, gym',
     url='https://github.com/maximecb/gym-minigrid',
     description='Minimalistic gridworld package for OpenAI Gym',
