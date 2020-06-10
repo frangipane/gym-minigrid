@@ -77,7 +77,7 @@ class ThreePhaseDelayedReward(gym.Env):
             if self._env_idx == 0 and self.carrying and self.carrying.type == 'key':
                 print("Agent picked up key!")
 
-            if self._env_idx == 0 and key_teleports_to_end_only:
+            if self._env_idx == 0 and self.key_teleports_to_end_only:
                 # Initialize agent in the final phase with the same carrying status as in phase 1
                 self._env_kwargs[-1]['carrying'] = self.carrying
             else:
