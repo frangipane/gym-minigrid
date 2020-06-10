@@ -6,6 +6,11 @@ class GoalKeyOptionalEnv(MiniGridEnv):
     """
     Environment in which the agent has to reach the goal.  If agent is initialized
     already carrying a key (of any color), agent is awarded extra upon reaching the goal.
+
+    Agent can optionally be forced to remain in the env for max_steps even after reaching
+    the goal, e.g. out of convenience for fixing episode length, by setting
+    done_when_goal_reached=False (agent will still receive the reward upon reaching
+    goal the first time, but future visits to goal will yield 0 reward).
     """
 
     def __init__(self,
@@ -15,10 +20,12 @@ class GoalKeyOptionalEnv(MiniGridEnv):
                  max_steps=8**2,
                  seed=1337,
                  goal_reward=1.,
+                 done_when_goal_reached=True,
     ):
         self._carrying = carrying
         self.key_reward = key_reward
         self.goal_reward = goal_reward
+        self._reached_goal_count = 0
 
         super().__init__(
             grid_size=size,
@@ -78,6 +85,19 @@ class GoalKeyOptionalEnv(MiniGridEnv):
             reward += self.key_reward
 
         return reward - 0.9 * (self.step_count / self.max_steps)
+
+    def step(self, action):
+        """
+        If done_when_goal_reached is False, then override done upon reaching goal if
+        step_count < max_steps.
+        """
+        obs, reward, done, info = super().step(action)
+
+        if done and not self.done_when_goal_reached and self.step_count < self.max_steps:
+            reward = reward if self._reached_goal_count == 0 else 0
+            done = False
+            self._reached_goal_count += 1
+        return obs, reward, done, info
 
 
 class GoalKeyOptionalEnvNoKey6x6(GoalKeyOptionalEnv):
