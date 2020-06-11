@@ -80,7 +80,7 @@ class ThreePhaseDelayedReward(gym.Env):
             if self._env_idx == 0 and self.key_teleports_to_end_only:
                 # Initialize agent in the final phase with the same carrying status as in phase 1
                 self._env_kwargs[-1]['carrying'] = self.carrying
-            else:
+            elif not self.key_teleports_to_end_only:
                 # If agent finished the current phase while carrying an object,
                 # then initialize it in next phase carrying the same object
                 self._env_kwargs[self._env_idx + 1]['carrying'] = self.carrying
