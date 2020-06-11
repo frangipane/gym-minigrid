@@ -9,8 +9,9 @@ class GoalKeyOptionalEnv(MiniGridEnv):
 
     Agent can optionally be forced to remain in the env for max_steps even after reaching
     the goal, e.g. out of convenience for fixing episode length, by setting
-    done_when_goal_reached=False (agent will still receive the reward upon reaching
-    goal the first time, but future visits to goal will yield 0 reward).
+    done_when_goal_reached=False.  The agent will receive a reward at very end of the episode,
+    based on how quickly it navigates to goal the first time and if it's carrying the key. (The
+    reward is deferred till the end of the episode.)
     """
 
     def __init__(self,
@@ -27,6 +28,7 @@ class GoalKeyOptionalEnv(MiniGridEnv):
         self.goal_reward = goal_reward
         self._reached_goal_count = 0
         self.done_when_goal_reached = done_when_goal_reached
+        self.final_reward = 0
 
         super().__init__(
             grid_size=size,
@@ -95,10 +97,18 @@ class GoalKeyOptionalEnv(MiniGridEnv):
         """
         obs, reward, done, info = super().step(action)
 
+        # Override reward and possibly done if not self.done_when_goal_reached
         if done and not self.done_when_goal_reached and self.step_count < self.max_steps:
-            reward = reward if self._reached_goal_count == 0 else 0
-            done = False
+            # Save reward to give at end of episode (ignore rewards from visits to the
+            # goal after the first visit).
+            if self._reached_goal_count == 0:
+                self.final_reward = reward
             self._reached_goal_count += 1
+            reward = 0
+            done = False
+        elif done and not self.done_when_goal_reached and self.step_count >= self.max_steps:
+            reward = reward if self._reached_goal_count == 0 else self.final_reward
+
         return obs, reward, done, info
 
 
